@@ -1,0 +1,575 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated color tokens for CuCoon minimal black & white theme */
+  --background: oklch(1 0 0); /* Pure white background */
+  --foreground: oklch(0 0 0); /* Pure black text */
+  --card: oklch(0.96 0 0); /* Light gray panels */
+  --card-foreground: oklch(0 0 0); /* Black text on panels */
+  --popover: oklch(1 0 0); /* White popovers */
+  --popover-foreground: oklch(0 0 0); /* Black text on popovers */
+  --primary: oklch(0 0 0); /* Black primary */
+  --primary-foreground: oklch(1 0 0); /* White on black */
+  --secondary: oklch(0.96 0 0); /* Light gray secondary */
+  --secondary-foreground: oklch(0 0 0); /* Black on light gray */
+  --muted: oklch(0.96 0 0); /* Muted light gray */
+  --muted-foreground: oklch(0.4 0 0); /* Dark gray muted text */
+  --accent: oklch(0.65 0.15 45); /* Orange accent for Cu */
+  --accent-foreground: oklch(1 0 0); /* White on orange */
+  --destructive: oklch(0.55 0.25 25); /* Red for alerts */
+  --destructive-foreground: oklch(1 0 0); /* White on red */
+  --border: oklch(0.9 0 0); /* Light border */
+  --input: oklch(0.96 0 0); /* Light input background */
+  --ring: oklch(0.65 0.15 45 / 0.5); /* Orange ring */
+  --chart-1: oklch(0.9 0 0);
+  --chart-2: oklch(0.65 0.15 45);
+  --chart-3: oklch(0 0 0);
+  --chart-4: oklch(1 0 0);
+  --chart-5: oklch(0.96 0 0);
+  --radius: 0.5rem;
+  --sidebar: oklch(0.96 0 0);
+  --sidebar-foreground: oklch(0 0 0);
+  --sidebar-primary: oklch(1 0 0);
+  --sidebar-primary-foreground: oklch(0 0 0);
+  --sidebar-accent: oklch(0.65 0.15 45);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(0.9 0 0);
+  --sidebar-ring: oklch(0.65 0.15 45 / 0.5);
+
+  /* Added custom colors for cocoon states */
+  --safe-glow: oklch(0.7 0.2 140); /* Green glow for safe state */
+  --alert-glow: oklch(0.6 0.25 25); /* Red glow for alert state */
+}
+
+.dark {
+  --background: oklch(0 0 0); /* Pure black background in dark mode */
+  --foreground: oklch(1 0 0); /* Pure white text in dark mode */
+  --card: oklch(0.1 0 0); /* Dark gray panels */
+  --card-foreground: oklch(1 0 0); /* White text on panels */
+  --popover: oklch(0 0 0); /* Black popovers */
+  --popover-foreground: oklch(1 0 0); /* White text on popovers */
+  --primary: oklch(1 0 0); /* White primary */
+  --primary-foreground: oklch(0 0 0); /* Black on white */
+  --secondary: oklch(0.15 0 0); /* Dark gray secondary */
+  --secondary-foreground: oklch(1 0 0); /* White on dark gray */
+  --muted: oklch(0.15 0 0); /* Muted dark gray */
+  --muted-foreground: oklch(0.7 0 0); /* Light gray muted text */
+  --accent: oklch(0.65 0.15 45); /* Orange accent remains same */
+  --accent-foreground: oklch(1 0 0); /* White on orange */
+  --destructive: oklch(0.55 0.25 25); /* Red for alerts */
+  --destructive-foreground: oklch(1 0 0); /* White on red */
+  --border: oklch(0.2 0 0); /* Dark border */
+  --input: oklch(0.15 0 0); /* Dark input background */
+  --ring: oklch(0.65 0.15 45 / 0.5); /* Orange ring */
+  --chart-1: oklch(0.2 0 0);
+  --chart-2: oklch(0.65 0.15 45);
+  --chart-3: oklch(1 0 0);
+  --chart-4: oklch(0 0 0);
+  --chart-5: oklch(0.15 0 0);
+  --sidebar: oklch(0.1 0 0);
+  --sidebar-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0 0 0);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.65 0.15 45);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(0.2 0 0);
+  --sidebar-ring: oklch(0.65 0.15 45 / 0.5);
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Added custom color tokens for cocoon states */
+  --color-safe-glow: var(--safe-glow);
+  --color-alert-glow: var(--alert-glow);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Added custom animations for cocoon states */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 20px currentColor);
+  }
+  50% {
+    filter: drop-shadow(0 0 40px currentColor);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-2px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes flash {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes unfold {
+  0% {
+    transform: scale(0.8) rotate(-10deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out infinite;
+}
+
+.flash {
+  animation: flash 1s ease-in-out infinite;
+}
+
+.unfold {
+  animation: unfold 1s ease-out forwards;
+}
+
+/* Added new life-themed animations for enhanced cocoon states */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 20px currentColor);
+  }
+  14% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 30px currentColor);
+  }
+  28% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 20px currentColor);
+  }
+  42% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 30px currentColor);
+  }
+  70% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 20px currentColor);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes bloom {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes emergency-pulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 20px currentColor) brightness(1);
+  }
+  25% {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 50px currentColor) brightness(1.5);
+  }
+  50% {
+    transform: scale(0.95);
+    filter: drop-shadow(0 0 30px currentColor) brightness(1.2);
+  }
+  75% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 45px currentColor) brightness(1.4);
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 20px currentColor) brightness(1);
+  }
+}
+
+@keyframes particle-float {
+  0% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) translateX(20px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.heartbeat {
+  animation: heartbeat 2s ease-in-out infinite;
+}
+
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.bloom {
+  animation: bloom 2s ease-out forwards;
+}
+
+.emergency-pulse {
+  animation: emergency-pulse 0.8s ease-in-out infinite;
+}
+
+.particle-float {
+  animation: particle-float 4s linear infinite;
+}
+
+.ripple {
+  animation: ripple 2s ease-out infinite;
+}
+
+/* Added new enhanced animations for the improved heart design */
+@keyframes heartbeat-gentle {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 15px currentColor);
+  }
+  15% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 25px currentColor);
+  }
+  30% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 15px currentColor);
+  }
+  45% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 25px currentColor);
+  }
+  75% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 15px currentColor);
+  }
+}
+
+@keyframes heartbeat-emergency {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 30px currentColor) brightness(1);
+  }
+  10% {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 60px currentColor) brightness(1.8);
+  }
+  20% {
+    transform: scale(0.9);
+    filter: drop-shadow(0 0 40px currentColor) brightness(1.3);
+  }
+  30% {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 55px currentColor) brightness(1.6);
+  }
+  50% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 30px currentColor) brightness(1);
+  }
+}
+
+@keyframes chamber-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    stroke-opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.08);
+    stroke-opacity: 0.9;
+  }
+}
+
+@keyframes chamber-alert {
+  0%,
+  100% {
+    transform: scale(1);
+    stroke-opacity: 0.7;
+  }
+  25% {
+    transform: scale(1.15);
+    stroke-opacity: 1;
+  }
+  75% {
+    transform: scale(0.95);
+    stroke-opacity: 0.5;
+  }
+}
+
+@keyframes core-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    fill-opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.1);
+    fill-opacity: 0.8;
+  }
+}
+
+@keyframes core-emergency {
+  0%,
+  100% {
+    transform: scale(1);
+    fill-opacity: 0.5;
+  }
+  25% {
+    transform: scale(1.3);
+    fill-opacity: 1;
+  }
+  75% {
+    transform: scale(0.8);
+    fill-opacity: 0.3;
+  }
+}
+
+@keyframes blood-flow {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -16;
+  }
+}
+
+@keyframes valve-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    fill-opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.5);
+    fill-opacity: 1;
+  }
+}
+
+@keyframes emergency-ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+@keyframes glow-breathe {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes glow-emergency {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  25% {
+    opacity: 0.9;
+    transform: scale(1.2);
+  }
+  75% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes glow-float {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translateY(0px) scale(1);
+  }
+  33% {
+    opacity: 0.3;
+    transform: translateY(-5px) scale(1.02);
+  }
+  66% {
+    opacity: 0.1;
+    transform: translateY(3px) scale(0.98);
+  }
+}
+
+.heartbeat-gentle {
+  animation: heartbeat-gentle 3s ease-in-out infinite;
+}
+
+.heartbeat-emergency {
+  animation: heartbeat-emergency 0.6s ease-in-out infinite;
+}
+
+.chamber-breathe {
+  animation: chamber-breathe 4s ease-in-out infinite;
+}
+
+.chamber-alert {
+  animation: chamber-alert 0.8s ease-in-out infinite;
+}
+
+.core-pulse {
+  animation: core-pulse 2s ease-in-out infinite;
+}
+
+.core-emergency {
+  animation: core-emergency 0.5s ease-in-out infinite;
+}
+
+.blood-flow {
+  animation: blood-flow 2s linear infinite;
+}
+
+.valve-pulse {
+  animation: valve-pulse 1.5s ease-in-out infinite;
+}
+
+.emergency-ripple {
+  animation: emergency-ripple 1.5s ease-out infinite;
+}
+
+.glow-breathe {
+  animation: glow-breathe 5s ease-in-out infinite;
+}
+
+.glow-emergency {
+  animation: glow-emergency 0.7s ease-in-out infinite;
+}
+
+.glow-float {
+  animation: glow-float 8s ease-in-out infinite;
+}
