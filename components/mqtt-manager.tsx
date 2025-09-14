@@ -1,70 +1,76 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
+import mqtt from 'mqtt';
 
 interface MqttManagerProps {
-  onStateChange: (state: "safe" | "alert") => void
+  onStateChange: (state: "safe" | "alert") => void;
 }
+
+const MQTT_BROKER_URL = 'wss://broker.hivemq.com:8884/mqtt'; // Reverted to wss
+const ALERT_TOPIC = 'cucoon/alert';
+// CONTROL_TOPIC is not needed in MqttManager as it no longer publishes
 
 export function MqttManager({ onStateChange }: MqttManagerProps) {
   const [isConnected, setIsConnected] = useState(false)
-  const [client, setClient] = useState<any>(null)
   const [connectionStatus, setConnectionStatus] = useState<"disconnected" | "connecting" | "connected">("disconnected")
 
-  // MQTT connection setup (placeholder for now)
   useEffect(() => {
-    // TODO: Implement actual MQTT connection when broker details are provided
-    // const mqtt = require('mqtt')
-    // const client = mqtt.connect('mqtt://broker-url:port')
+    setConnectionStatus("connecting");
+    console.log("[MQTT Manager] Initializing new MQTT client...");
+    const newClient = mqtt.connect(MQTT_BROKER_URL);
 
-    console.log("[v0] MQTT Manager initialized - ready for broker configuration")
+    newClient.on('connect', () => {
+      console.log('[MQTT Manager] MQTT Client: Connected');
+      setIsConnected(true);
+      setConnectionStatus('connected');
+      newClient.subscribe(ALERT_TOPIC, (err) => {
+        if (!err) {
+          console.log('[MQTT Manager] Subscribed to topic:', ALERT_TOPIC);
+        } else {
+          console.error('[MQTT Manager] MQTT subscription error:', err);
+        }
+      });
+    });
 
-    // Simulate connection for now
-    setIsConnected(false) // Will be true when actual MQTT is configured
-    setConnectionStatus("disconnected")
+    newClient.on('message', (receivedTopic: string, message: Buffer) => {
+      if (!message) {
+        console.warn('[MQTT Manager] Received an empty or invalid MQTT message.');
+        return;
+      }
+      const messageStr = message.toString();
+      console.log('[MQTT Manager] Message received on topic '+ receivedTopic + ':', messageStr);
+      if (receivedTopic === ALERT_TOPIC) {
+        if (messageStr === 'ALERT') {
+          onStateChange('alert');
+        } else if (messageStr === 'STOP') {
+          onStateChange('safe');
+        }
+      }
+    });
+
+    newClient.on('error', (err) => {
+      console.error('[MQTT Manager] MQTT Error:', err);
+      setConnectionStatus('disconnected');
+      setIsConnected(false);
+    });
+
+    newClient.on('close', () => {
+      console.log('[MQTT Manager] MQTT Client: Connection closed');
+      setConnectionStatus('disconnected');
+      setIsConnected(false);
+    });
 
     return () => {
-      if (client) {
-        client.end()
+      console.log('[MQTT Manager] Cleaning up MQTT client...');
+      if (newClient.connected) {
+        newClient.end();
+      } else {
+        // If not connected, but still has pending connections, ensure it's closed
+        newClient.end(true); // Force close pending connections
       }
-    }
-  }, [])
-
-  const connectMqtt = useCallback(
-    (brokerUrl: string, port: number, topic: string) => {
-      // This function will be called when broker details are provided
-      console.log("[v0] Connecting to MQTT broker:", { brokerUrl, port, topic })
-
-      setConnectionStatus("connecting")
-
-      // TODO: Implement actual MQTT connection
-      // const mqtt = require('mqtt')
-      // const newClient = mqtt.connect(`mqtt://${brokerUrl}:${port}`)
-
-      // newClient.on('connect', () => {
-      //   console.log('[v0] MQTT Connected')
-      //   setIsConnected(true)
-      //   setConnectionStatus('connected')
-      //   newClient.subscribe(topic)
-      // })
-
-      // newClient.on('message', (receivedTopic: string, message: Buffer) => {
-      //   if (receivedTopic === topic) {
-      //     const messageStr = message.toString()
-      //     const state = messageStr.toLowerCase().includes('alert') ? 'alert' : 'safe'
-      //     onStateChange(state)
-      //   }
-      // })
-
-      // newClient.on('error', () => {
-      //   setConnectionStatus('disconnected')
-      //   setIsConnected(false)
-      // })
-
-      // setClient(newClient)
-    },
-    [onStateChange],
-  )
+    };
+  }, [onStateChange]); // onPublish and publish removed from dependencies
 
   const getStatusColor = () => {
     switch (connectionStatus) {
@@ -139,5 +145,5 @@ export function MqttManager({ onStateChange }: MqttManagerProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

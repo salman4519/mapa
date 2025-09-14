@@ -5,15 +5,31 @@ import { CocoonAnimation } from "@/components/cocoon-animation"
 import { StatusDisplay } from "@/components/status-display"
 import { MqttManager } from "@/components/mqtt-manager"
 import { Button } from "@/components/ui/button"
+import mqtt, { MqttClient } from "mqtt"
 
 export default function CuCoonDashboard() {
   const [systemState, setSystemState] = useState<"safe" | "alert">("safe")
-  const [sirenAudio, setSirenAudio] = useState<HTMLAudioElement | null>(null)
-  const sirenRef = useRef<HTMLAudioElement | null>(null)
+  const [sirenAudio, setSirenAudio] = useState<any>(null)
+  const [mqttClient, setMqttClient] = useState<MqttClient | null>(null)
+
+  // Initialize MQTT client for publishing
+  useEffect(() => {
+    const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt")
+    client.on("connect", () => {
+      console.log("[Dashboard] MQTT Client Connected")
+    })
+    client.on("error", (err) => {
+      console.error("[Dashboard] MQTT Error:", err)
+    })
+    setMqttClient(client)
+
+    return () => {
+      if (client.connected) client.end()
+    }
+  }, [])
 
   // Initialize siren audio
   useEffect(() => {
-    // Create a simple siren sound using Web Audio API
     const createSirenSound = () => {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
       const oscillator = audioContext.createOscillator()
@@ -25,15 +41,13 @@ export default function CuCoonDashboard() {
       oscillator.type = "sine"
       oscillator.frequency.setValueAtTime(800, audioContext.currentTime)
 
-      // Create siren effect by modulating frequency
       const lfo = audioContext.createOscillator()
       const lfoGain = audioContext.createGain()
       lfo.connect(lfoGain)
       lfoGain.connect(oscillator.frequency)
 
-      lfo.frequency.setValueAtTime(2, audioContext.currentTime) // 2Hz modulation
-      lfoGain.gain.setValueAtTime(200, audioContext.currentTime) // Modulation depth
-
+      lfo.frequency.setValueAtTime(2, audioContext.currentTime)
+      lfoGain.gain.setValueAtTime(200, audioContext.currentTime)
       gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
 
       return { oscillator, lfo, gainNode, audioContext }
@@ -41,71 +55,75 @@ export default function CuCoonDashboard() {
 
     if (typeof window !== "undefined") {
       const sirenData = createSirenSound()
-      setSirenAudio(sirenData as any)
+      setSirenAudio(sirenData)
     }
   }, [])
 
-  // Handle state changes and siren audio
+  // Handle siren start/stop based on system state
   useEffect(() => {
     if (systemState === "alert" && sirenAudio) {
-      // Start siren sound
       try {
-        const { oscillator, lfo } = sirenAudio as any
+        const { oscillator, lfo } = sirenAudio
         oscillator.start()
         lfo.start()
-      } catch (error) {
-        console.log("[v0] Audio context may need user interaction to start")
+      } catch {
+        console.log("[Dashboard] Audio context may need user interaction to start")
       }
     } else if (systemState === "safe" && sirenAudio) {
-      // Stop siren sound
-      try {
-        const { oscillator, lfo, audioContext } = sirenAudio as any
-        oscillator.stop()
-        lfo.stop()
-        audioContext.close()
-
-        // Recreate for next alert
-        const newSirenData = (() => {
-          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-          const oscillator = audioContext.createOscillator()
-          const gainNode = audioContext.createGain()
-
-          oscillator.connect(gainNode)
-          gainNode.connect(audioContext.destination)
-
-          oscillator.type = "sine"
-          oscillator.frequency.setValueAtTime(800, audioContext.currentTime)
-
-          const lfo = audioContext.createOscillator()
-          const lfoGain = audioContext.createGain()
-          lfo.connect(lfoGain)
-          lfoGain.connect(oscillator.frequency)
-
-          lfo.frequency.setValueAtTime(2, audioContext.currentTime)
-          lfoGain.gain.setValueAtTime(200, audioContext.currentTime)
-
-          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
-
-          return { oscillator, lfo, gainNode, audioContext }
-        })()
-
-        setSirenAudio(newSirenData as any)
-      } catch (error) {
-        console.log("[v0] Error stopping audio:", error)
-      }
+      stopSirenAudio()
     }
   }, [systemState, sirenAudio])
 
+  const stopSirenAudio = () => {
+    if (!sirenAudio) return
+    try {
+      const { oscillator, lfo, audioContext } = sirenAudio
+      oscillator.stop()
+      lfo.stop()
+      audioContext.close()
+
+      const newSirenData = (() => {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+        oscillator.type = "sine"
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime)
+
+        const lfo = audioContext.createOscillator()
+        const lfoGain = audioContext.createGain()
+        lfo.connect(lfoGain)
+        lfoGain.connect(oscillator.frequency)
+        lfo.frequency.setValueAtTime(2, audioContext.currentTime)
+        lfoGain.gain.setValueAtTime(200, audioContext.currentTime)
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
+
+        return { oscillator, lfo, gainNode, audioContext }
+      })()
+
+      setSirenAudio(newSirenData)
+      console.log("[Dashboard] Siren audio reset")
+    } catch (error) {
+      console.error("[Dashboard] Error stopping siren audio:", error)
+    }
+  }
+
+  const handleStopSiren = () => {
+    console.log("[Dashboard] Stop Siren clicked")
+    setSystemState("safe")
+
+    // Publish STOP via MQTT
+    if (mqttClient && mqttClient.connected) {
+      mqttClient.publish("cucoon/control", "STOP")
+      console.log("[Dashboard] STOP sent via MQTT")
+    }
+
+    stopSirenAudio()
+  }
+
   const handleMqttStateChange = (state: "safe" | "alert") => {
     setSystemState(state)
-  }
-
-  const handleTestSafe = () => {
-    setSystemState("safe")
-  }
-
-  const handleTestAlert = () => {
-    setSystemState("alert")
   }
 
   return (
@@ -129,22 +147,17 @@ export default function CuCoonDashboard() {
         <StatusDisplay state={systemState} />
       </div>
 
-      {/* Test Controls */}
-      <div className="flex gap-4 mb-8">
-        <Button
-          onClick={handleTestSafe}
-          variant="outline"
-          className="bg-green-500/10 border-green-500 text-green-700 hover:bg-green-500/20 hover:text-green-800"
-        >
-          Test Safe
-        </Button>
-        <Button
-          onClick={handleTestAlert}
-          variant="outline"
-          className="bg-red-500/10 border-red-500 text-red-900 hover:bg-red-500/20 hover:text-red-950"
-        >
-          Test Alert
-        </Button>
+      {/* Stop Button */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        {systemState === "alert" && (
+          <Button
+            onClick={handleStopSiren}
+            variant="outline"
+            className="bg-yellow-500/10 border-yellow-500 text-yellow-700 hover:bg-yellow-500/20 hover:text-yellow-800"
+          >
+            Stop Siren
+          </Button>
+        )}
       </div>
 
       {/* System Info */}
