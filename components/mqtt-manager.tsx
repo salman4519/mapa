@@ -7,9 +7,8 @@ interface MqttManagerProps {
   onStateChange: (state: "safe" | "alert") => void;
 }
 
-const MQTT_BROKER_URL = 'wss://broker.hivemq.com:8884/mqtt'; // Reverted to wss
+const MQTT_BROKER_URL = 'wss://broker.hivemq.com:8884/mqtt';
 const ALERT_TOPIC = 'cucoon/alert';
-// CONTROL_TOPIC is not needed in MqttManager as it no longer publishes
 
 export function MqttManager({ onStateChange }: MqttManagerProps) {
   const [isConnected, setIsConnected] = useState(false)
@@ -45,6 +44,8 @@ export function MqttManager({ onStateChange }: MqttManagerProps) {
           onStateChange('alert');
         } else if (messageStr === 'STOP') {
           onStateChange('safe');
+        } else if (messageStr === 'TEST_ALERT') { // Handle TEST_ALERT for consistency if needed, though not directly used by MqttManager
+          onStateChange('alert');
         }
       }
     });
@@ -66,11 +67,10 @@ export function MqttManager({ onStateChange }: MqttManagerProps) {
       if (newClient.connected) {
         newClient.end();
       } else {
-        // If not connected, but still has pending connections, ensure it's closed
         newClient.end(true); // Force close pending connections
       }
     };
-  }, [onStateChange]); // onPublish and publish removed from dependencies
+  }, [onStateChange]);
 
   const getStatusColor = () => {
     switch (connectionStatus) {
@@ -109,8 +109,8 @@ export function MqttManager({ onStateChange }: MqttManagerProps) {
   }
 
   return (
-    <div className="fixed bottom-6 left-6 bg-black/80 backdrop-blur-sm border border-gray-700 rounded-lg p-4 font-mono text-sm">
-      <div className="flex items-center gap-3 mb-2">
+    <div className="bg-black/80 backdrop-blur-sm border border-gray-700 rounded-lg p-4 font-mono text-sm">
+      <div className="flex items-center gap-3 ">
         <div className="relative">
           <div className={`w-3 h-3 rounded-full shadow-lg transition-all duration-300 ${getStatusIndicator()}`} />
           {connectionStatus === "connected" && (
@@ -123,27 +123,9 @@ export function MqttManager({ onStateChange }: MqttManagerProps) {
         </div>
       </div>
 
-      {connectionStatus === "disconnected" && (
-        <div className="text-xs text-gray-400 border-t border-gray-700 pt-2 mt-2">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-1 bg-gray-500 rounded-full" />
-            <span>Awaiting broker configuration</span>
-          </div>
-          <div className="flex items-center gap-2 mt-1">
-            <div className="w-1 h-1 bg-gray-500 rounded-full" />
-            <span>Ready for URL, port & topic setup</span>
-          </div>
-        </div>
-      )}
+      
 
-      {connectionStatus === "connected" && (
-        <div className="text-xs text-green-400 border-t border-gray-700 pt-2 mt-2">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
-            <span>Monitoring active</span>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }

@@ -235,13 +235,13 @@ export function CocoonAnimation({ state, className = "" }: CocoonAnimationProps)
 
         {state === "alert" && (
           <>
-            <div className="absolute inset-0 rounded-full border-4 border-red-500 emergency-ripple opacity-80" />
+            <div className="absolute inset-12 rounded-full border-4 border-red-500 emergency-ripple opacity-80" />
             <div
-              className="absolute inset-0 rounded-full border-3 border-red-400 emergency-ripple opacity-60"
+              className="absolute inset-12 rounded-full border-3 border-red-400 emergency-ripple opacity-60"
               style={{ animationDelay: "0.3s" }}
             />
             <div
-              className="absolute inset-0 rounded-full border-2 border-red-300 emergency-ripple opacity-40"
+              className="absolute inset-12 rounded-full border-2 border-red-300 emergency-ripple opacity-40"
               style={{ animationDelay: "0.6s" }}
             />
           </>
