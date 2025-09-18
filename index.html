@@ -46,6 +46,48 @@
                 opacity: 1;
             }
         }
+/* From Uiverse.io by vikiWayne */ 
+.button {
+  padding: 1em 2em;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #ab2b3a;
+  transition: all 1000ms;
+  font-size: 15px;
+  position: relative;
+  overflow: hidden;
+  outline: 2px solid #ab2b3a;
+}
+
+button:hover {
+  color: #ffffff;
+  transform: scale(1.1);
+  outline: 2px solid #ab2b3a;
+  box-shadow: 4px 5px 17px -4px #ab2b3a;
+}
+
+button::before {
+  content: "";
+  position: absolute;
+  left: -50px;
+  top: 0;
+  width: 0;
+  height: 100%;
+  background-color: #ab2b3a;
+  transform: skewX(45deg);
+  z-index: -1;
+  transition: width 1000ms;
+}
+
+button:hover::before {
+  width: 250%;
+}
+
+
     </style>
 </head>
 <body class="min-h-screen bg-white flex flex-col items-center justify-center p-4 sm:p-8">
@@ -86,7 +128,7 @@
         <div id="buttonContainer" class="flex flex-wrap justify-center gap-4 sm:gap-6 px-4 hidden">
             <button
                 id="stopBtn"
-                class="px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg border-2 border-gray-800 text-gray-800 hover:bg-gray-100 transition-all duration-200 bg-transparent rounded-md"
+                class="button"
             >
                 STOP
             </button>
